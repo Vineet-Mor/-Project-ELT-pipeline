@@ -1,0 +1,21 @@
+Dataset quixotic-treat-419302.sales_data_24 already exists
+sales_data_24.sales_24 already exist
+sales_data_24.product_24 already exist
+sales_data_24.customer_24 already exist
+Created external table quixotic-treat-419302:sales_data_24.external_sales_24
+Created external table quixotic-treat-419302:sales_data_24.external_product_24
+Created external table quixotic-treat-419302:sales_data_24.external_customer_24
+Executed query: 
+CREATE OR REPLACE TABLE sales_data_24.sales_24 AS
+SELECT *
+FROM sales_data_24.external_sales_24
+
+Executed query: 
+CREATE OR REPLACE TABLE sales_data_24.product_24 AS
+SELECT *
+FROM sales_data_24.external_product_24
+
+Executed query: 
+CREATE OR REPLACE TABLE sales_data_24.customer_24 AS
+SELECT *
+FROM sales_data_24.external_customer_24
