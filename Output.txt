@@ -1,21 +1,29 @@
-Dataset quixotic-treat-419302.sales_data_24 already exists
-sales_data_24.sales_24 already exist
-sales_data_24.product_24 already exist
-sales_data_24.customer_24 already exist
+Dataset(DatasetReference('quixotic-treat-419302', 'sales_data_24'))
+Created dataset quixotic-treat-419302.sales_data_24
+Created table quixotic-treat-419302.sales_data_24.sales_24
+Created table quixotic-treat-419302.sales_data_24.product_24
+Created table quixotic-treat-419302.sales_data_24.customer_24
 Created external table quixotic-treat-419302:sales_data_24.external_sales_24
 Created external table quixotic-treat-419302:sales_data_24.external_product_24
 Created external table quixotic-treat-419302:sales_data_24.external_customer_24
 Executed query: 
-CREATE OR REPLACE TABLE sales_data_24.sales_24 AS
-SELECT *
-FROM sales_data_24.external_sales_24
+MERGE `quixotic-treat-419302.sales_data_24.sales_24` T
+USING `sales_data_24.external_sales_24` S
+ON   T.SaleId=S.SaleId AND T.OrderId=S.OrderId AND T.ProductId=S.ProductId AND T.Quantity=S.Quantity
+WHEN MATCHED THEN
+  UPDATE SET T.SaleId=S.SaleId, T.OrderId=S.OrderId, T.ProductId=S.ProductId, T.Quantity=S.Quantity
+WHEN NOT MATCHED THEN
+  INSERT (SaleId, OrderId, ProductId, Quantity)
+  VALUES (S.SaleId, S.OrderId, S.ProductId, S.Quantity)
 
 Executed query: 
-CREATE OR REPLACE TABLE sales_data_24.product_24 AS
-SELECT *
-FROM sales_data_24.external_product_24
-
-Executed query: 
-CREATE OR REPLACE TABLE sales_data_24.customer_24 AS
-SELECT *
-FROM sales_data_24.external_customer_24
+MERGE `quixotic-treat-419302.sales_data_24.product_24` T
+USING `sales_data_24.external_product_24` S
+ON   T.ProductId=S.ProductId AND T.Name=S.Name AND T.ManufacturedCountry=S.ManufacturedCountry AND T.WeightGrams=S.WeightGrams
+    
+WHEN MATCHED THEN
+  UPDATE SET T.ProductId=S.ProductId, T.Name=S.Name, T.ManufacturedCountry=S.ManufacturedCountry, T.WeightGrams=S.WeightGrams
+...
+WHEN NOT MATCHED THEN
+  INSERT (CustomerId, Active, Name, Address, City, Country, Email)
+  VALUES (S.CustomerId, S.Active, S.Name, S.Address, S.City, S.Country, S.Email)
