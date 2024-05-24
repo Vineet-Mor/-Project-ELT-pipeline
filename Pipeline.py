@@ -7,7 +7,7 @@ current_time=datetime.now().date()
 date=current_time.strftime("%y-%m-%d").split("-")[-1]
 month=current_time.strftime("%y-%m-%d").split("-")[-2]
 year=current_time.strftime("%y-%m-%d").split("-")[-3]
-#dataset_id=f"quixotic-treat-419302.sales_data_{year}"
+dataset_id=f"quixotic-treat-419302.sales_data_{year}"
 #dataset_id=f"sales_data_{year}"
 # Creating BigQuery dataset -------------------------------------
 try:
@@ -110,23 +110,39 @@ external_product_table_id = dataset_id+f".external_product_{year}"
 # Defining upsert queries for sales, product, customer tables
 # Upsert sales data query 
 upsert_sales_query = f"""
-CREATE OR REPLACE TABLE {sales_table_id} AS
-SELECT *
-FROM {external_sales_table_id}
+MERGE `{sales_table_id}` T
+USING `{external_sales_table_id}` S
+ON   T.SaleId=S.SaleId AND T.OrderId=S.OrderId AND T.ProductId=S.ProductId AND T.Quantity=S.Quantity
+WHEN MATCHED THEN
+  UPDATE SET T.SaleId=S.SaleId, T.OrderId=S.OrderId, T.ProductId=S.ProductId, T.Quantity=S.Quantity
+WHEN NOT MATCHED THEN
+  INSERT (SaleId, OrderId, ProductId, Quantity)
+  VALUES (S.SaleId, S.OrderId, S.ProductId, S.Quantity)
 """
 
 # Upsert products data query 
-upsert_products_query = f"""
-CREATE OR REPLACE TABLE {product_table_id} AS
-SELECT *
-FROM {external_product_table_id}
+upsert_products_query =f"""
+MERGE `{product_table_id}` T
+USING `{external_product_table_id}` S
+ON   T.ProductId=S.ProductId AND T.Name=S.Name AND T.ManufacturedCountry=S.ManufacturedCountry AND T.WeightGrams=S.WeightGrams
+    
+WHEN MATCHED THEN
+  UPDATE SET T.ProductId=S.ProductId, T.Name=S.Name, T.ManufacturedCountry=S.ManufacturedCountry, T.WeightGrams=S.WeightGrams
+WHEN NOT MATCHED THEN
+  INSERT (ProductId, Name, ManufacturedCountry, WeightGrams)
+  VALUES (S.ProductId, S.Name, S.ManufacturedCountry, S.WeightGrams)
 """
 
 # Upsert customers data query
 upsert_customers_query = f"""
-CREATE OR REPLACE TABLE {customer_table_id} AS
-SELECT *
-FROM {external_customer_table_id}
+MERGE `{customer_table_id}` T
+USING `{external_customer_table_id}` S
+ON   T.CustomerId=S.CustomerId AND T.Active=S.Active AND T.Name=S.Name AND T.Address=S.Address AND T.City=S.City AND T.Country=S.Country AND T.Email=S.Email
+WHEN MATCHED THEN
+  UPDATE SET T.CustomerId=S.CustomerId, T.Active=S.Active, T.Name=S.Name, T.Address=S.Address, T.City=S.City, T.Country=S.Country, T.Email=S.Email
+WHEN NOT MATCHED THEN
+  INSERT (CustomerId, Active, Name, Address, City, Country, Email)
+  VALUES (S.CustomerId, S.Active, S.Name, S.Address, S.City, S.Country, S.Email)
 """
 
 # Execute upsert queries ----------------------------------------------------------------------
